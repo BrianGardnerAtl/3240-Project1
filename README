@@ -1,0 +1,11 @@
+This is the repository for CS 3240 Languages and Computation
+
+This project is going to be a scanner generator. The scanner
+(table-driven DFA) is created using a set of lexical specifications.
+These specifications are turned into primitive NFA's that are joined
+into one giant NFA. From there the giant NFA is turned into the
+table-driven DFA.
+
+Once the scanner is created it should be able to accept a file
+that follows the lexical specifications and parse it into tokens
+that are returned to the driver program.
