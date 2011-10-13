@@ -1,0 +1,7 @@
+1) parse the lexical specs
+2)take parsed specs and created a bunch of NFA's
+3)Combine all of the NFA's into one giant NFA
+4)Convert giant NFA into table-driven DFA (The scanner deliverable)
+5)Make a driver to use the table-drivben DFA to parse an input file
+
+bonus) Minimize generated DFA
