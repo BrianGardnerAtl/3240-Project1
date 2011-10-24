@@ -1,0 +1,12 @@
+NFA needs
+
+-Start node
+-End node
+
+
+NFA node needs
+-list of transition variables and next states
+  -Hash table with trans vars as key and array of next states as value
+
+
+DFA table needs
