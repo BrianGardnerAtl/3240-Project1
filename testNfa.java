@@ -9,6 +9,7 @@ public class testNfa{
     NfaNode startNode = nfa.getStart();
     System.out.println("Single node NFA");
     nfa.printNfa(startNode);    //Prints out 'Initial Node:   {}' since there are no transitions
+    System.out.println();
 
     NfaNode temp1 = new NfaNode("second");
     NfaNode temp2 = new NfaNode("third");
@@ -16,6 +17,7 @@ public class testNfa{
     nfa.addNode(temp2, "b"); //Transition to temp2 on the character b
     System.out.println("Three node NFA");
     nfa.printNfa(startNode);
+    System.out.println();
 
     NfaNode transNode = nfa.makeTransition("a");
     if(nfa.setCurrent(transNode.getIdentifier())){
@@ -27,5 +29,6 @@ public class testNfa{
     nfa.addNode(temp4, "b");
     System.out.println("Test makeTransition");
     nfa.printNfa(startNode);
+    System.out.println();
   }
 }
