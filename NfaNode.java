@@ -5,6 +5,7 @@ public class NfaNode{
   /* Start with 10, increase by 10 when limit reached */
   private Hashtable transitions = new Hashtable<String, NfaNode>(10,10);
   private NfaNode[] epsilonTransitions = new NfaNode[20];
+  private String identifier; // TODO figure out what to use for unique identifiers
   static String EPSILON = "epsilon";
 
   public NfaNode(boolean finState){
@@ -17,7 +18,7 @@ public class NfaNode{
   }
 
   /* Add transitions to the hashtable */
-  public void addTransition(String key, NfaNode next){
+  public boolean addTransition(String key, NfaNode next){
     if(key == null){
       return false;
     }
@@ -27,9 +28,10 @@ public class NfaNode{
     else{
       /* append the next node to the nextNodes array */
       NfaNode[] nextNodes = (NfaNode[])transitions.get(key);
+      NfaNode[] check = nextNodes;
       int length = nextNodes.length;
       nextNodes[length] = next;
-      transitions.put(key, nextNodes);
+      return (transitions.put(key, nextNodes) == check);
     }
   }
 
@@ -61,5 +63,13 @@ public class NfaNode{
 
   public boolean isFinal(){
     return finalState;
+  }
+
+  public void setIdentifier(String ident){
+    identifier = ident;
+  }
+
+  public String getIdentifier(){
+    return identifier;
   }
 }
