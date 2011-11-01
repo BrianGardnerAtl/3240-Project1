@@ -17,7 +17,7 @@ public class NfaNode{
   }
 
   /* Add transitions to the hashtable */
-  public boolean addTransition(String key, NfaNode next){
+  public void addTransition(String key, NfaNode next){
     if(key == null){
       return false;
     }
@@ -27,10 +27,9 @@ public class NfaNode{
     else{
       /* append the next node to the nextNodes array */
       NfaNode[] nextNodes = (NfaNode[])transitions.get(key);
-      NfaNode[] check = nextNodes;
       int length = nextNodes.length;
       nextNodes[length] = next;
-      return (transitions.put(key, nextNodes) == check);
+      transitions.put(key, nextNodes);
     }
   }
 
