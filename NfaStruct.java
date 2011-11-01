@@ -73,7 +73,13 @@ public class NfaStruct{
     return false;
   }
 
-  public NfaNode[] getEpsilonClosure(NfaNode node){
-    return node.getEpsilonTransition();
+  /* Gets the epsilon closures of the current node */
+  public NfaNode[] getEpsilonClosure(){
+    if(current!=null){
+      return current.getEpsilonTransition();
+    }
+    else{
+      return null; //null if node is empty
+    }
   }
 }
