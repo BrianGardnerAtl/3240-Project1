@@ -6,19 +6,23 @@ public class NfaStruct{
   private NfaNode[] finalStates = new NfaNode[20];
   private int finalCount;
   private Hashtable allNodes = new Hashtable<String, NfaNode>(10,10); //Node identifier is the key, the node object is the value
+  private int nodeCount;
 
+  /* Creates an NfaStruct with the input node as the start state */
+  public NfaStruct(NfaNode node){
+    start = node;
+    current = node;
+    if(node!=null){
+      nodeCount = 1;
+    }
+    else{
+      nodeCount = 0;
+    }
+  }
+
+  /* Creates an empty NfaStruct */
   public NfaStruct(){
-    start = null;
-    current = null;
-    finalCount = 0;
-  }
-
-  public NfaNode getStart(){
-    return start;
-  }
-
-  public NfaNode[] getFinal(){
-    return finalStates;
+    this(null);
   }
 
   public NfaNode makeTransition(String key){
@@ -39,11 +43,25 @@ public class NfaStruct{
     if(start==null){
       start = node;
       current = node;
+      nodeCount += 1;
       return true;
     }
     else{
+      nodeCount += 1;
       return current.addTransition(transition, node); //Just add a node that is connected to the current node
     }
+  }
+
+  public NfaNode getStart(){
+    return start;
+  }
+
+  public NfaNode[] getFinal(){
+    return finalStates;
+  }
+
+  public int getNodeCount(){
+    return nodeCount;
   }
 
   /* Method that changes the current node, returns false if no node has the identifier */

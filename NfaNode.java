@@ -6,7 +6,7 @@ public class NfaNode{
   private Hashtable transitions = new Hashtable<String, NfaNode>(10,10);
   private NfaNode[] epsilonTransitions = new NfaNode[20];
   private String identifier; // TODO figure out what to use for unique identifiers
-  static String EPSILON = "epsilon";
+  private static String EPSILON = "epsilon";
 
   public NfaNode(boolean finState){
     finalState = finState;
