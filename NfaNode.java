@@ -8,13 +8,14 @@ public class NfaNode{
   private String identifier; // TODO figure out what to use for unique identifiers
   private static String EPSILON = "epsilon";
 
-  public NfaNode(boolean finState){
+  public NfaNode(String ident, boolean finState){
+    identifier = ident;
     finalState = finState;
     epsilonTransitions[0] = this;
   }
 
-  public NfaNode(){
-    this(false);
+  public NfaNode(String ident){
+    this(ident, false);
   }
 
   /* Add transitions to the hashtable */
@@ -45,10 +46,14 @@ public class NfaNode{
     return transitions.containsKey(key);
   }
 
-  /* Returns an array of transitions that result from the specified key */
-  public NfaNode getTransitions(String key){
+  /* Returns the next node from taking the input key */
+  public NfaNode getTransition(String key){
     NfaNode nextNode = (NfaNode)transitions.get(key);
     return nextNode;
+  }
+
+  public Hashtable getAllTransitions(){
+    return transitions;
   }
 
   public NfaNode[] getEpsilonTransition(){

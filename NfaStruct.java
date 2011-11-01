@@ -28,17 +28,21 @@ public class NfaStruct{
   public NfaNode makeTransition(String key){
     if(current!=null){
       if(current.isTransition(key)){
-        return current.getTransitions(key);
+        return current.getTransition(key);
       }
     }
     return null;
   }
 
   public boolean addNode(NfaNode node, String transition){
+    if(node==null){
+      return false;
+    }
     if(node.isFinal()){
       finalStates[finalCount] = node;
       finalCount++;
     }
+    allNodes.put(node.getIdentifier(), node);
 
     if(start==null){
       start = node;
@@ -80,6 +84,19 @@ public class NfaStruct{
     }
     else{
       return null; //null if node is empty
+    }
+  }
+
+  public void printNfa(NfaNode init){
+    //Print out the initial node and its transitions
+    NfaNode temp = init;
+    System.out.printf("%s:\t", temp.getIdentifier());
+    Hashtable tempTrans = temp.getAllTransitions();
+    System.out.println(tempTrans.toString());
+
+    //Recurse through all of the transitions from the init node
+    for(Enumeration<NfaNode> nodeEnum = tempTrans.elements(); nodeEnum.hasMoreElements();){
+      printNfa(nodeEnum.nextElement());
     }
   }
 }
