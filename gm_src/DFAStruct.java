@@ -1,18 +1,22 @@
 import java.util.*;
 
 /** Takes in an NFAstruct and makes a DFA from it
- * THIS ASSUMES THAT THE NFA WAS BUILT SO THAT NO NDOE HAS MULTIPLE TRANSITIONS ON THE SAME
+ * ASSUMES THAT THE NFA WAS BUILT SO THAT NO NDOE HAS MULTIPLE TRANSITIONS ON THE SAME
  * INPUT
  *
  */
-
 public class DFAStruct {
 	private DFANode init;
 	private DFANode current;
-	private ArrayList<DFANode> table;
+	public ArrayList<DFANode> table;
+	//these are for minimizing
+	public ArrayList<DFANode> nodesCombined;
+	public DFANode combinedNode;
 	
 	public DFAStruct(NfaStruct nfa){
 		table = new ArrayList<DFANode>();
+		nodesCombined = new ArrayList<DFANode>(2);
+		combinedNode = new DFANode();
 		startDFA(nfa);
 	}
 	
@@ -52,9 +56,6 @@ public class DFAStruct {
 		DFANode nextNode = new DFANode(init.getTransitionOn(abc.get(0)));
 		init.next = nextNode;
 		
-		//System.out.println(nextNode);
-		//System.out.println(nfa.getNode("s2").getAllTransitions());
-		//System.out.println(init);
 		//build rest of table
 		table.add(init);
 		buildDFA(nfa, init, abc);
@@ -82,6 +83,10 @@ public class DFAStruct {
 				}
 				cur.addTransition(tran);
 			}
+			//check if current is final state
+			for(String id: cur.getIDs()){
+				if(nfa.getNode(id).isFinal()){cur.setFinal(true);}
+			}
 			//create next node for table
 			//first build a list of destinations
 			ArrayList<ArrayList<String>> dest = new ArrayList<ArrayList<String>>();
@@ -99,10 +104,6 @@ public class DFAStruct {
 					DFANode dnode = new DFANode(d);
 					if(!table.contains(dnode) && !found){
 						nextNode = dnode;
-						//check is dnode is final state
-						for(String id: dnode.getIDs()){
-							if(nfa.getNode(id).isFinal()){nextNode.setFinal(true);}
-						}
 						found = true;
 					}
 				}
@@ -116,12 +117,136 @@ public class DFAStruct {
 	}
 	
 	/**
+	 * minimizes this DFA
+	 */
+	public void minimize(){
+		//splits table into accepting and non-accepting
+		ArrayList<DFANode> accept = new ArrayList<DFANode>();
+		ArrayList<DFANode> naccept = new ArrayList<DFANode>();
+		DFANode t;
+		for(DFANode n : table){
+			t = new DFANode();
+			for(String id : n.getIDs()){
+				t.addID(id);
+			}
+			for(DFATransition tran : n.getTransitions()){
+				t.addTransition(tran.deepCopy());
+			}
+			t.setFinal(n.isFinal());
+			if(!accept.contains(t) && t.isFinal()){accept.add(t);}
+			else if(!naccept.contains(t) && !t.isFinal()){naccept.add(t);}
+		}
+		boolean done = false;
+		while(!done){
+			if(accept.size()>1){
+				done = combineCheck(accept);
+				if(!done){update(accept); update(naccept);}
+			}
+			else{done = true;}
+		}
+		done = false;
+		while(!done){
+			if(naccept.size()>1){
+				done = combineCheck(naccept);
+				if(!done){update(accept); update(naccept);}
+			}
+			else{done = true;}
+		}
+		
+		ArrayList<DFANode> min = new ArrayList<DFANode>();
+		min.addAll(accept);
+		min.addAll(naccept);
+		table = min;
+	}
+	
+	/**
+	 * checks if any nodes can be combined and combines them, for minimization
+	 * returns true if nothing was combined
+	 */
+	private boolean combineCheck(ArrayList<DFANode> tbl){
+		for(DFANode cur : tbl){
+			for(DFANode comp : tbl){
+				if(!cur.equals(comp)){
+					//go through transitions to compare
+					boolean tran = true;
+					for(DFATransition trn: cur.getTransitions()){
+						//node made from destination of this transition, for comparison (IDs)
+						DFANode t = new DFANode(trn.getDest());
+						if(comp.getTransitions().contains(trn) && tran){
+							//they share a transition on trn's input
+							//should always be true i dunno why i even check for it??
+							if(!trn.equalsM(comp.getTransitions().get(comp.getTransitions().indexOf(trn)))){
+								//destination isnt the same
+								DFANode t2 = new DFANode(comp.getTransitions().get(comp.getTransitions().indexOf(trn)).getDest());
+								if(!t.equals(cur) || !t.equals(comp)){
+									//destination isnt either of these nodes, cannot be combined
+									tran = false;
+								}
+								if(!t2.equals(cur) || !t2.equals(comp)){
+									//destination isnt either of these nodes, cannot be combined
+									tran = false;
+								}
+							}//if
+						}//if
+					}//for
+					if(tran){
+						//transitions are all the same, combine and return false(to loop through again)
+						//helper stuff for updating the table
+						DFANode temp = new DFANode();
+						for(String id : cur.getIDs()){
+							temp.addID(id);
+						}
+						DFANode temp2 = new DFANode();
+						for(String id2 : comp.getIDs()){
+							temp2.addID(id2);
+						}
+						nodesCombined.clear();
+						nodesCombined.add(temp);
+						nodesCombined.add(temp2);
+						boolean updateInit = false;
+						if(init.equals(cur) || init.equals(comp)){updateInit = true;}
+						//combine
+						cur.addIDs(comp.getIDs());
+						combinedNode = cur;
+						//update init if necessary, remove 2nd node and return
+						if(updateInit){init=cur;}
+						tbl.remove(comp);
+						return false;
+					}
+				}//if(!cur.equals(comp))
+			}//for
+		}//for
+		
+		//nothing to be combined, this group is done
+		return true;
+	}
+	
+	/**
+	 * updates transitions if nodes have been combined
+	 */
+	private void update(ArrayList<DFANode> group){
+		//if any nodes in this list went to the newly combined node on a transition
+		//their destination is updated
+		ArrayList<String> d = new ArrayList<String>();
+		d.add("6");d.add("2");d.add("7");d.add("3");d.add("8");d.add("10");d.add("4");
+		DFANode dn = new DFANode(d);
+		for(DFANode n: group){
+			for(DFATransition trn : n.getTransitions()){
+				DFANode t = new DFANode(trn.getDest());
+				if(t.equals(nodesCombined.get(0)) || t.equals(nodesCombined.get(1))){
+					trn.addDest(combinedNode.getIDs());
+				}
+			}
+		}
+	}
+	
+	/**
 	 * 
 	 * @param token
 	 * @return whether the token is accepted
 	 */
 	public boolean accepts(String input){
-		current = init;		
+		current = init;
 		//break string into a bunch of smaller strings (per character)
 		for(int i = 0; i<input.length(); i++){
 			current = makeTransitionOn(Character.toString(input.charAt(i)));
@@ -131,6 +256,11 @@ public class DFAStruct {
 		return current.isFinal();
 	}
 	
+	/**
+	 * 
+	 * @param input
+	 * @return the new current node after transition, null if there is not one
+	 */
 	private DFANode makeTransitionOn(String in){
 		DFANode t = null;
 		if(current.isTransition(in)){
@@ -150,4 +280,7 @@ public class DFAStruct {
 		return t;
 	}
 	
+	public int size(){
+		return table.size();
+	}
 }

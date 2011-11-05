@@ -1,11 +1,17 @@
 import java.util.*;
 
-
+/**
+ * Represents entry in DFA table
+ * @author George Munoz
+ *
+ */
 public class DFANode {
 	private ArrayList<String> IDs; //all the IDs of this mega node
 	private boolean accepting;
 	private ArrayList<DFATransition> transitions;
-	public DFANode next; //THIS IS NOT NECESSARILY THE NEXT NODE ON THE DFA, IT IS THE NEXT ENTRY IN THE TABLE
+	//THIS IS NOT NECESSARILY THE NEXT NODE ON THE DFA, IT IS THE NEXT ENTRY IN THE TABLE
+	//also, probably broken after minimizing
+	public DFANode next; 
 	
 	public DFANode(ArrayList<String> ids, boolean isFinal){
 		IDs = ids;
@@ -46,6 +52,11 @@ public class DFANode {
 		return transitions.get(transitions.indexOf(t)).getDest();
 	}
 	
+	/**
+	 * 
+	 * @param in  input to transition
+	 * @return true if the input has corresponding transition
+	 */
 	public boolean isTransition(String in){
 		DFATransition t = new DFATransition(in);		
 		return (transitions.contains(t));
@@ -54,7 +65,10 @@ public class DFANode {
 	public void addTransition(DFATransition dfat){
 		transitions.add(dfat);
 	}
-		
+	
+	/**
+	 * returns true if o is a DFANode with the same ID
+	 */
 	@Override public boolean equals(Object o){
 		DFANode o2 = (DFANode) o;
 		if(IDs.size()!=o2.getIDs().size()){
@@ -72,6 +86,12 @@ public class DFANode {
 	
 	public void addID(String id){
 		if(!IDs.contains(id)){IDs.add(id);}
+	}
+	
+	public void addIDs(ArrayList<String> ids){
+		for(String id : ids){
+			addID(id);
+		}
 	}
 	
 	public String toString(){
