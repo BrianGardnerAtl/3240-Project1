@@ -109,7 +109,7 @@ public class NfaStruct{
   
   /* Updates the epsilon closures of all the nodes*/
   public void updateEpsilonClosures(){
-	  NfaNode cur;;
+	  NfaNode cur;
 	  ArrayList<NfaNode> curtrans;
 	  ArrayList<NfaNode> visited = new ArrayList<NfaNode>();
 	  //make enumeration of all the keys to iterate through table
