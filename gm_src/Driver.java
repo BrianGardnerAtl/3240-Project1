@@ -103,22 +103,6 @@ class Driver {
        
         reader.close();        
         
-        /* Done reading the file? Print out all matched tokens and the associated identifiers... */
-        for( Enumeration<String> ident = identTokens.keys(); ident.hasMoreElements();) {
-            ident.nextElement();
-            System.out.println("Identifier: " + ident);
-            
-            if( (currentTokens = identTokens.get(ident)) != null) {
-                while( !currentTokens.empty()) {
-                    System.out.println("   Token: " + currentTokens.pop());
-                }
-            } else {
-                System.out.println("   No associated tokens for this identifier.");
-            }
-            
-            System.out.println();
-        }
-        
         System.out.println("Finished parse and tokenization!");
     }
 }
