@@ -40,4 +40,8 @@
                 return 0;
             }
         }
+
+        public static char[] getMembers(){
+          return members;
+        }
     }

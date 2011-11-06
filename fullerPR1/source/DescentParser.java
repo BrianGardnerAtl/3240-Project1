@@ -12,19 +12,19 @@ class DescentParser {
     /*
      * Individual NFA nodes for each of the methods
      */
-    private NfaNode rexp;
-    private NfaNode rexp_prime;
-    private NfaNode rexp1;
-    private NfaNode rexp2;
-    private NfaNode rexp2_tail;
-    private NfaNode rexp3;
-    private NfaNode char_class;
-    private NfaNode char_class1;
-    private NfaNode char_set_list;
-    private NfaNode char_set;
-    private NfaNode char_set_tail;
-    private NfaNode exclude_set;
-    private NfaNode exclude_set_tail;
+    private NfaNode rexp = new NfaNode("rexp");
+    private NfaNode rexp_prime = new NfaNode("rexp_prime");
+    private NfaNode rexp1 = new NfaNode("rexp1");
+    private NfaNode rexp2 = new NfaNode("rexp2");
+    private NfaNode rexp2_tail = new NfaNode("rexp2_tail");
+    private NfaNode rexp3 = new NfaNode("rexp3");
+    private NfaNode char_class = new NfaNode("char_class");
+    private NfaNode char_class1 = new NfaNode("char_class1");
+    private NfaNode char_set_list = new NfaNode("char_set_list");
+    private NfaNode char_set = new NfaNode("char_set");
+    private NfaNode char_set_tail = new NfaNode("char_set_tail");
+    private NfaNode exclude_set = new NfaNode("exclude_set");
+    private NfaNode exclude_set_tail = new NfaNode("exclude_set_tail");
 
     /* counts for all of the nfa nodes so each node has a unique identifier */
     private int rexpCnt = 0;
@@ -169,7 +169,6 @@ class DescentParser {
         if( match('|') && rexp1() && rexp_prime()) {
             temp.addEpsilonTransition(rexp1);
             rexp_prime.addEpsilonTransition(temp);
-            // TODO add rexp_prime() output to the nfa node
             if( debugMode) { System.out.println("REXP_PRIME - true"); }
             rexpPrimeCnt += 1;
             return true;
@@ -216,7 +215,6 @@ class DescentParser {
                     if( debugMode) { System.out.println("REXP2 - true"); }
                     temp.addEpsilonTransition(rexp2_tail);
                     rexp2.addEpsilonTransition(temp);
-                    //TODO add epsilon enclosures to get the correct functionality
                     rexp2Cnt += 1;
                     return true;
                 } else {
@@ -275,7 +273,14 @@ class DescentParser {
         NfaNode temp = new NfaNode(name);
         if( debugMode) { System.out.println("CHAR_CLASS"); }
         if( match('.')) /* || DEFINED */ {
-            //TODO add a transition to char_class for all characters
+            //add a transition to temp for all characters from RE_CHAR
+            NfaNode endNode = new NfaNode("Stuff");
+            char[] allTrans = RE_CHAR.getMembers();
+            int transLen = allTrans.length;
+            for(int i=0; i<transLen; i++){
+              temp.addTransition(Character.toString(allTrans[i]), endNode);
+            }
+            char_class.addEpsilonTransition(temp);
             if( debugMode) { System.out.println("CHAR_CLASS - true"); }
             charClassCnt += 1;
             return true;
@@ -380,7 +385,7 @@ class DescentParser {
                 for( int i = 0; i < skipAhead; i++) {
                     match(currentChar());
                 }
-                //TODO add transition for char_set_tail
+                // TODO add transition for char_set_tail
                 if( debugMode) { System.out.println("CHAR_SET_TAIL - true"); }
                 charSetTailCnt += 1;
                 return true;
@@ -389,7 +394,6 @@ class DescentParser {
                 return false;
             }
         } else {
-            //TODO add transition for char_set_tail
             if( debugMode) { System.out.println("CHAR_SET_TAIL - epsilon"); }
             return true;
         }
@@ -415,7 +419,8 @@ class DescentParser {
         NfaNode temp = new NfaNode(name);
         if( debugMode) { System.out.println("EXCLUDE_SET_TAIL"); }
         if( match('[') && char_set() && match(']') /* || DEFINED */) {
-            exclude_set_tail.addEpsilonTransition(char_set);
+            temp.addEpsilonTransition(char_set);
+            exclude_set_tail.addEpsilonTransition(temp);
             if( debugMode) { System.out.println("EXCLUDE_SET_TAIL - true"); }
             excludeSetTailCnt += 1;
             return true;
